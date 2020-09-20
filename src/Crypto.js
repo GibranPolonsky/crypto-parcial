@@ -1,5 +1,5 @@
 import * as  math from 'mathjs';
-const alphabet = "abcdefghijklmnopqrstuvwxyz 1234567890";
+const alphabet = "abcdefghijklmnopqrstuvwxyz ";
 
 export const toMatrix = (text = "") => {
     let result = [];
@@ -16,14 +16,15 @@ export const toMatrix = (text = "") => {
     if(column.length > 0 ){
         result = [...result, fillMissingColumn(column) ];
     }
-    return math.matrix(result);
+    return math.matrix( flipMatrix(result) );
 }
 
 export const encrypt = (text = "", secret=[]) => {
     try{
-        const matrix1 = toMatrix(text);
-        const matrixSecret = math.matrix(secret);
-        const result = math.multiply(matrix1._data, matrixSecret._data);
+        let matrix1 =  toMatrix(text);
+        let matrixSecret = math.matrix(secret);
+
+        const result = math.multiply(matrixSecret._data, matrix1._data);
         return JSON.stringify(result);
     }catch(e){
         alert(e.message);
@@ -33,10 +34,10 @@ export const encrypt = (text = "", secret=[]) => {
 
 export const decrypt = (criptedJson = "[]", secret = []) => {
     try{
-        const matrix1 = math.matrix( JSON.parse(criptedJson) );
+        const matrix1 = math.matrix( JSON.parse(criptedJson));
         const matrixSecret = math.inv(math.matrix(secret));
-        const result = math.multiply(matrix1._data, matrixSecret._data);
-        return result.map(x => {
+        const result = math.multiply(matrixSecret._data, matrix1._data);
+        return flipMatrix(result).map(x => {
         return x.map(y => alphabet[Math.round(y) - 1].toUpperCase()).join('');
         }).join("");
     }catch(e){
@@ -97,6 +98,20 @@ const fillMissingColumn = (array = []) => {
     let result = [...array];
     for(let i = 0; i < maxValue - array.length; i++){
         result = [...result, alphabet.indexOf(" ") + 1];
+    }
+    return result;
+}
+
+const flipMatrix = ( array = []) => {
+    const resultRows = array[0].length;
+    const resultColumns = array.length;
+    let result = [];
+    for(let i = 0; i < resultRows; i++){
+        let row = [];
+        for(let j = 0; j < resultColumns; j++){
+          row = [...row, array[j][i]];
+        }
+        result = [...result, row];
     }
     return result;
 }

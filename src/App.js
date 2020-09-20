@@ -88,14 +88,14 @@ class App extends React.Component {
     let resultArray = [];
     if(result && method === 'matrices'){
       resultJSON = JSON.parse(result);
-      resultRows = resultJSON[0].length;
-      resultColumns = resultJSON.length;
 
-      for(let i = 0; i < resultRows; i++){
-        for(let j = 0; j < resultColumns; j++){
-          resultArray = [...resultArray, resultJSON[j][i]];
-        }
-      }
+
+      resultColumns = resultJSON[0].length;
+      resultRows = resultJSON.length;
+
+      resultJSON.forEach(x => {
+        resultArray = [...resultArray, ...x];
+      });
     }
     
 
