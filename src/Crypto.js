@@ -19,10 +19,10 @@ export const toMatrix = (text = "") => {
     return math.matrix(result);
 }
 
-export const encrypt = (text = "", secret="") => {
+export const encrypt = (text = "", secret=[]) => {
     try{
         const matrix1 = toMatrix(text);
-        const matrixSecret = toMatrix(secret);
+        const matrixSecret = math.matrix(secret);
         const result = math.multiply(matrix1._data, matrixSecret._data);
         return JSON.stringify(result);
     }catch(e){
@@ -31,10 +31,10 @@ export const encrypt = (text = "", secret="") => {
     
 }
 
-export const decrypt = (criptedJson = "[]", secret = "") => {
+export const decrypt = (criptedJson = "[]", secret = []) => {
     try{
         const matrix1 = math.matrix( JSON.parse(criptedJson) );
-        const matrixSecret = math.inv(toMatrix(secret));
+        const matrixSecret = math.inv(math.matrix(secret));
         const result = math.multiply(matrix1._data, matrixSecret._data);
         return result.map(x => {
         return x.map(y => alphabet[Math.round(y) - 1].toUpperCase()).join('');

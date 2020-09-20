@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.css';
 import { decrypt, decryptCajas, encrypt, encryptCajas } from './Crypto';
+import Matrix from './Matrix';
 
 class App extends React.Component {
 
@@ -18,16 +19,6 @@ class App extends React.Component {
   }
 
 
-  componentDidMount() {
-    const secret = "123d56789";
-    const cryptedValue = encrypt("PUERCAT", secret);
-    const decryptedValue = decrypt(cryptedValue, secret);
-
-    const cryptedCajas = encryptCajas("ME CAGO EN TODO ME DUELE LA CABEZA", "AAA");
-    const decryptedCajas = decryptCajas(cryptedCajas, "AAA");
-
-    //this.downloadAsTxt(cryptedValue);
-  }
   downloadAsTxt = (string = "") => {
     const element = document.createElement("a");
     const file = new Blob([string], { type: 'text/plain' });
@@ -43,7 +34,7 @@ class App extends React.Component {
       const result = selectedMethod(message, secret);
       this.setState({ result });
     }else{
-      alert("Debe ingresar el Codigo secreto y el mensaje");
+      alert("Debe ingresar el Código secreto y el mensaje");
     }
   }
 
@@ -54,7 +45,7 @@ class App extends React.Component {
       const resultDecrypted = selectedMethod(cryptedMessage, secret);
       this.setState({resultDecrypted});
     }else{
-      alert("Debe ingresar el Codigo secreto y el mensaje");
+      alert("Debe ingresar el Código secreto y el mensaje");
     }
     
   }
@@ -71,6 +62,12 @@ class App extends React.Component {
     this.setState({ [name]: value });
   }
 
+  onChangeMatrixCode = (matrix) => {
+    this.setState({
+      secret: matrix,
+    });
+  }
+
   onImportFile = (e) => {
     const { files } = e.target;
     const fr = new FileReader();
@@ -83,6 +80,25 @@ class App extends React.Component {
 
   render() {
     const { method, methods, secret, message, result, cryptedMessage, resultDecrypted } = this.state;
+
+
+    let resultJSON = [];
+    let resultRows = 0;
+    let resultColumns = 0;
+    let resultArray = [];
+    if(result && method === 'matrices'){
+      resultJSON = JSON.parse(result);
+      resultRows = resultJSON[0].length;
+      resultColumns = resultJSON.length;
+
+      for(let i = 0; i < resultRows; i++){
+        for(let j = 0; j < resultColumns; j++){
+          resultArray = [...resultArray, resultJSON[j][i]];
+        }
+      }
+    }
+    
+
     return (
       <div className="container" style={{paddingBottom: 50}}>
         <div className="row">
@@ -99,11 +115,20 @@ class App extends React.Component {
                     ))}
                   </select>
                 </div>
-                <div className="form-group">
-                  <label htmlFor="secret">Codigo Secreto</label>
-                  <input value={secret} type="text" className="form-control" name="secret" onChange={this.onChange} aria-describedby="emailHelp" />
+                {method === 'cajas' ? 
+                  <div className="form-group">
+                    <label htmlFor="secret">Código Secreto</label>
+                    <input value={secret} type="text" className="form-control" name="secret" onChange={this.onChange} aria-describedby="emailHelp" />
+                    <small id="emailHelp" className="form-text text-muted">No compartas este código públicamente</small>
+                  </div>
+                :
+                <div>
+                  <label htmlFor="secret">Código Secreto</label>
+                  <Matrix rows={3} columns={3} onChange={this.onChangeMatrixCode}/>
                   <small id="emailHelp" className="form-text text-muted">No compartas este código públicamente</small>
                 </div>
+                }
+                
               </div>
                 
             </div>
@@ -119,6 +144,11 @@ class App extends React.Component {
                 </div>
                 {result && <p>Tu resultado encriptado: </p>}
                 <code>{result}</code>
+                <br/><hr/>
+                {result && method === 'matrices' &&
+                  <Matrix size='55px' rows={resultRows} columns={resultColumns} data={resultArray} disabled={true} />
+                }
+                
                 <br /><hr />
                 <button onClick={this.encrypt} className="btn btn-primary">Cifrar</button>
                 <button style={{ marginLeft: 20 }} onClick={this.export} className="btn btn-warning">Exportar</button>
